@@ -1,4 +1,4 @@
-# GymLog server
+# GymLog server - this is super vibe coded
 
 A small server you run at home (on the Pop!_OS machine) so several people on the same network can each keep their GymLog backups in one place.
 **Every person is a separate user with their own token.** Everyone sees only their own data.
