@@ -1,0 +1,15 @@
+services:
+  gymlog-server:
+    build: .
+    container_name: gymlog-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"            # change the left number to use another port on this machine
+    environment:               # values come from the optional .env file next to this one (see .env.example)
+      GYMLOG_ADMIN_TOKEN: ${GYMLOG_ADMIN_TOKEN:-}
+      GYMLOG_MAX_UPLOAD_MB: ${GYMLOG_MAX_UPLOAD_MB:-500}
+      GYMLOG_KEEP_BACKUPS: ${GYMLOG_KEEP_BACKUPS:-10}
+      GYMLOG_USER_QUOTA_MB: ${GYMLOG_USER_QUOTA_MB:-5000}
+      GYMLOG_FAILED_LOGINS_PER_MINUTE: ${GYMLOG_FAILED_LOGINS_PER_MINUTE:-10}
+    volumes:
+      - ./data:/data           # everything (users, backups) lives in this folder next to this file

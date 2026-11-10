@@ -1,0 +1,3 @@
+# Keep Unix line endings in the repository: a Windows-style Dockerfile or script breaks on Linux.
+* text=auto eol=lf
+*.zip binary
