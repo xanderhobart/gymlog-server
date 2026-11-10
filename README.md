@@ -12,8 +12,7 @@ A small server you run at home (on the Pop!_OS machine) so several people on the
 Anyone can run their own GymLog server for their own backups; nothing is shared between copies. You need a computer that is on at home (a
 Linux PC, a Raspberry Pi, a NAS) with **Docker** and **Docker Compose**.
 
-1. Make an empty folder and save [`compose.selfhost.yml`](compose.selfhost.yml) in it as `docker-compose.yml`. In it, replace `OWNER` with the GitHub
-   user this project is published under.
+1. Make an empty folder and save [`compose.selfhost.yml`](compose.selfhost.yml) in it as `docker-compose.yml`.
 2. `docker compose up -d`
 3. `docker compose exec gymlog-server python -m app.cli add-user "Me"` &mdash; prints your **token**. Keep it.
 4. Find the computer's address (`hostname -I`) and allow the port if there is a firewall (`sudo ufw allow 8080/tcp`).
@@ -119,8 +118,7 @@ python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt     # Wind
 2. Publish the image: `git tag v1.0.0 && git push origin v1.0.0`. The **Publish the Docker image** workflow builds it for amd64 and arm64 and pushes it to
    `ghcr.io/<you>/gymlog-server` (tags `1.0.0`, `1.0` and `latest`). Watch it under the repository's *Actions* tab.
 3. Make the image public so others can pull it without logging in: GitHub profile > *Packages* > `gymlog-server` > *Package settings* > *Change visibility*.
-4. Put your GitHub user in place of `OWNER` in `compose.selfhost.yml` and commit.
-5. For new versions: change `VERSION` in `app/config.py`, commit, tag `v1.1.0`, push the tag.
+4. For new versions: change `VERSION` in `app/config.py`, commit, tag `v1.1.0`, push the tag.
 
 ## Licence
 

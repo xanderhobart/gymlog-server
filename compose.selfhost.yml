@@ -1,14 +1,13 @@
 # For someone who just wants to run their own GymLog server: no building, no source code needed.
 #
 #   1. Save this file (as docker-compose.yml) in an empty folder.
-#   2. Replace OWNER below with the GitHub user the image is published under.
-#   3. docker compose up -d
-#   4. docker compose exec gymlog-server python -m app.cli add-user "Me"     <- prints your token, once
+#   2. docker compose up -d
+#   3. docker compose exec gymlog-server python -m app.cli add-user "Me"     <- prints your token, once
 #
 # Your backups live in the ./data folder next to this file. Back that folder up.
 services:
   gymlog-server:
-    image: ghcr.io/OWNER/gymlog-server:latest
+    image: ghcr.io/xanderhobart/gymlog-server:latest
     container_name: gymlog-server
     restart: unless-stopped
     ports:
