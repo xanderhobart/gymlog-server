@@ -13,7 +13,7 @@ Anyone can run their own GymLog server for their own backups; nothing is shared 
 Linux PC, a Raspberry Pi, a NAS) with **Docker** and **Docker Compose**.
 
 1. Make an empty folder and save [`compose.selfhost.yml`](compose.selfhost.yml) in it as `docker-compose.yml`.
-2. `docker compose up -d`
+2. `mkdir -p data && sudo chown 10001:10001 data` (the server runs as an ordinary user, id 10001, and must be allowed to write to `./data`), then `docker compose up -d`
 3. `docker compose exec gymlog-server python -m app.cli add-user "Me"` &mdash; prints your **token**. Keep it.
 4. Find the computer's address (`hostname -I`) and allow the port if there is a firewall (`sudo ufw allow 8080/tcp`).
 5. In the GymLog app, enter `http://<that address>:8080` and your token (app support is being added).
@@ -30,6 +30,7 @@ On the Pop!_OS machine, with Docker and Docker Compose installed:
 
 ```bash
 cd GymLog-Server            # this folder
+mkdir -p data && sudo chown 10001:10001 data
 docker compose up -d --build
 docker compose logs gymlog-server     # the first start prints the ADMIN TOKEN (also saved in ./data/admin_token)
 curl http://localhost:8080/health     # {"status":"ok",...}

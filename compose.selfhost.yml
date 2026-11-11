@@ -1,7 +1,8 @@
 # For someone who just wants to run their own GymLog server: no building, no source code needed.
 #
 #   1. Save this file (as docker-compose.yml) in an empty folder.
-#   2. docker compose up -d
+#   2. mkdir -p data && sudo chown 10001:10001 data      <- the server runs as user 10001 and must be allowed to write there
+#      docker compose up -d
 #   3. docker compose exec gymlog-server python -m app.cli add-user "Me"     <- prints your token, once
 #
 # Your backups live in the ./data folder next to this file. Back that folder up.
