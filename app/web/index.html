@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GymLog Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232a78d6'/%3E%3Cpath d='M6 20l6-8 5 6 4-5 5 7' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<section id="signin" class="signin hidden">
+  <h1>GymLog dashboard</h1>
+  <p class="sec">Sign in with your GymLog server token (the one you entered in the app under Settings, Server backup). It is only sent to this server.</p>
+  <form id="signin-form" autocomplete="off">
+    <input id="token" type="password" placeholder="gl_..." aria-label="Your token" autocomplete="off" required>
+    <label class="check"><input id="remember" type="checkbox"> Remember me on this computer</label>
+    <button class="btn primary" type="submit">Open my dashboard</button>
+    <p id="signin-error" class="error hidden" role="alert"></p>
+  </form>
+</section>
+
+<div id="app" class="hidden">
+  <header class="top">
+    <h1>GymLog dashboard</h1>
+    <span class="who" id="who"></span>
+    <span class="seg" role="group" aria-label="Weight unit"><button id="u-lb" aria-pressed="true">lb</button><button id="u-kg" aria-pressed="false">kg</button></span>
+    <span class="seg" role="group" aria-label="Theme"><button id="t-auto" aria-pressed="true">Auto</button><button id="t-light" aria-pressed="false">Light</button><button id="t-dark" aria-pressed="false">Dark</button></span>
+    <button class="btn small" id="signout">Sign out</button>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+  <div class="filters" id="filters"></div>
+  <main id="main" aria-live="polite"></main>
+</div>
+
+<script src="charts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-VERSION = "1.0"
+VERSION = "1.1"
 
 
 def _int(name: str, default: int) -> int:

@@ -1,14 +1,17 @@
 """The web side: the addresses the GymLog app (and the admin) talk to."""
 import hashlib
 import logging
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from .config import VERSION, Settings
+from .dashboard import build_router
 from .security import FailureLimiter, bearer
 from .service import BackupError, NameTaken, NotFound, QuotaError, Service
 
@@ -133,6 +136,16 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
     def delete_backup(backup_id: str, user: Dict[str, Any] = Depends(current_user)):
         service.delete_backup(user["id"], backup_id)
         return Response(status_code=204)
+
+    # ---------------------------------------------------------------- the dashboard: charts and downloads of a user's own latest backup
+
+    app.include_router(build_router(service, settings, current_user))
+    web_dir = Path(__file__).parent / "web"
+    app.mount("/dashboard", StaticFiles(directory=web_dir, html=True), name="dashboard")
+
+    @app.get("/", include_in_schema=False)
+    def front_page():
+        return RedirectResponse("/dashboard/")
 
     # ---------------------------------------------------------------- the admin: manages people, never reads their data
 

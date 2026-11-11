@@ -6,6 +6,7 @@ A small server you run at home (on the Pop!_OS machine) so several people on the
 - Nothing leaves your network. It stores each person's GymLog backup files (the same zip the app's Backup > Export makes).
 - The admin makes and switches off users but never reads their backups.
 - Runs in Docker. All its data is one folder (`./data`), easy to back up.
+- **A dashboard** you open in a browser on any computer on the network: trends for every exercise, volume by body part, body weight, cardio, how your backups are doing, and downloads to Excel or CSV. See "The dashboard" below.
 
 ## Run your own copy (quick start)
 
@@ -16,7 +17,8 @@ Linux PC, a Raspberry Pi, a NAS) with **Docker** and **Docker Compose**.
 2. `mkdir -p data && sudo chown 10001:10001 data` (the server runs as an ordinary user, id 10001, and must be allowed to write to `./data`), then `docker compose up -d`
 3. `docker compose exec gymlog-server python -m app.cli add-user "Me"` &mdash; prints your **token**. Keep it.
 4. Find the computer's address (`hostname -I`) and allow the port if there is a firewall (`sudo ufw allow 8080/tcp`).
-5. In the GymLog app, enter `http://<that address>:8080` and your token (app support is being added).
+5. In the GymLog app (Settings > Server backup) enter `http://<that address>:8080` and your token, press *Test connection*, then *Back up now*. To see your
+   data as charts, open `http://<that address>:8080/` in a browser and sign in with the same token.
 
 To update later: `docker compose pull && docker compose up -d`. Your data stays in the `./data` folder; copy it to back it up.
 More than one person can share one server: add each with their own `add-user` and token, and they only ever see their own backups.
@@ -80,6 +82,27 @@ address and their token in the app. Other commands:
 Copy `.env.example` to `.env`, edit, then `docker compose up -d --build`:
 `GYMLOG_ADMIN_TOKEN`, `GYMLOG_MAX_UPLOAD_MB` (500), `GYMLOG_KEEP_BACKUPS` (10), `GYMLOG_USER_QUOTA_MB` (5000), `GYMLOG_FAILED_LOGINS_PER_MINUTE` (10).
 
+## The dashboard
+
+Open `http://<the server's address>:8080/` in any browser on the same network and sign in with your own token (the same one the app uses). You see
+only your own data, read from your newest backup, so the dashboard is only as fresh as your last backup (the app sends one about twice a day, or press
+*Back up now*).
+
+- **Overview**: totals, a calendar of workout days, weekly volume, new personal bests, and a few plain-language notes (an exercise that has stalled, a body
+  part that gets little work, training that has dropped off).
+- **Exercises**: pick any exercise to chart its estimated one-rep max, top set, average weight, volume or reps over time, with variants combined or one line each.
+- **Muscles**: sets a week and volume by body part (the same exercise-to-muscle rules as the app), plus most-used exercises and variants.
+- **Body**: weight with a 7-day average, and a lift's strength compared with your body weight.
+- **Cardio**: minutes a week and time by activity.
+- **Backups**: when the last one was made, storage used, what each backup holds and how it changed, download any of them, and a list of possible typing mistakes in your data.
+- **Export**: everything as one Excel workbook (a sheet per table) or CSV files, or one table at a time. Use the time range at the top to export only part.
+
+Every chart has a **Table** button showing the same numbers, works with the keyboard (arrow keys move along a line), and follows your light or dark setting.
+The weight unit switch (lb or kg) is at the top. The page needs no internet: all of it is served by the server itself.
+
+The page is plain HTTP like the rest, so on a home network it is fine but do not expose it to the internet without HTTPS (see below). Your token is kept
+in the browser tab only (cleared when you close it) unless you tick *Remember me on this computer*; *Sign out* clears it either way.
+
 ## For the app (and anything else)
 
 | Address | Who | What |
@@ -89,6 +112,7 @@ Copy `.env.example` to `.env`, edit, then `docker compose up -d --build`:
 | `POST /api/backups` | a user | the body is the backup zip (`Content-Type: application/zip`; optional `X-Device-Name`). 201 stored, 200 identical to the newest (nothing changed), 400 not a GymLog backup, 413 too big, 507 over the allowance |
 | `GET /api/backups` | a user | your backups, newest first, with what is in each (workouts, sets, weigh-ins, photos) |
 | `GET /api/backups/latest`, `GET /api/backups/{id}` | a user | download |
+| `GET /api/dash/...` | a user | what the dashboard shows (overview, weekly, calendar, exercises, exercise, muscles, body, cardio, backups, checks, export); each takes `from`, `to` and `backup` where it makes sense |
 | `DELETE /api/backups/{id}` | a user | delete one of your own |
 | `POST /admin/users` `{"name":"Sam"}` | admin | make a user, returns the token once |
 | `GET /admin/users`, `POST /admin/users/{id}/reset-token`, `.../disable`, `.../enable`, `DELETE /admin/users/{id}` | admin | look after users |
@@ -99,8 +123,7 @@ Quick test without the app: `python tools/gymlog_upload.py upload backup.zip --s
 
 - **No encryption.** On your own Wi-Fi this is usually fine, but tokens and backups travel as plain HTTP. If the server is ever reachable from outside the
   house, put it behind HTTPS (a reverse proxy such as Caddy) or a VPN such as Tailscale first.
-- Android blocks plain `http://` addresses by default, so the GymLog app needs to be told it may talk to a home-network server (a setting in the app, to be
-  added with the app's sync feature).
+- Android blocks plain `http://` addresses by default; the GymLog app (1.3 and newer) is set up to allow them so a home server works.
 - **Back it up:** copy the `./data` folder now and then (stop the container first for a perfectly clean copy). It holds the user list and every backup.
 - **Update:** replace the files, then `docker compose up -d --build`. Your data folder is untouched.
 - Moving to another machine: copy the whole folder including `./data`.
@@ -109,7 +132,7 @@ Quick test without the app: `python tools/gymlog_upload.py upload backup.zip --s
 
 ```bash
 python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt     # Windows: .venv\Scripts\...
-.venv/bin/python -m pytest          # 25 tests: separation of users, tokens, uploads, limits, the command line
+.venv/bin/python -m pytest          # 47 tests: separation of users, tokens, uploads, limits, the command line, the dashboard's numbers and downloads
 ```
 
 ## For the person publishing this (maintainer notes)
@@ -125,7 +148,11 @@ python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt     # Wind
 
 MIT, see [LICENSE](LICENSE). Use it, change it and share it freely; there is no warranty.
 
+## Trying the dashboard on real data
+
+`python tools/db_to_backup.py gymlog.db out.zip` turns a copy of the phone's database into a backup file, which you can upload with `tools/gymlog_upload.py`.
+
 ## What comes next
 
-This is the "Docker container (API + storage)" step. Next are the app's side (settings for the server address, token and home Wi-Fi, and an upload
-that runs when the phone joins that Wi-Fi, with retries), then a dashboard that reads each user's data.
+The server, the app's backup feature (Settings > Server backup) and the dashboard are all in. Ideas for later: photos in the dashboard (they are in the
+backups already, but they are private, so it would be opt-in), comparing two time periods side by side, and a yearly summary.
